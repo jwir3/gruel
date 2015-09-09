@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+buildscript {
+  repositories {
+    maven {
+      url uri('../repo')
+    }
+  }
+
+  dependencies {
+    classpath group: 'com.glasstowerstudios.gruel',
+                    name: 'gruel',
+                    version: '1.0.0-SNAPSHOT'
+  }
+}
+
+apply plugin: 'gruel'
+
+repositories {
+  mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.glasstowerstudios.gruel.testapp.Hello'
+    }
+}
