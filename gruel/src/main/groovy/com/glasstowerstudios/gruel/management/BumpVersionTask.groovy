@@ -1,23 +1,13 @@
 package com.glasstowerstudios.gruel;
 
-import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.internal.tasks.options.Option
 
-class BumpVersionTask extends DefaultTask {
+import com.glasstowerstudios.gruel.base.GruelTask;
 
-  // The prefix we're going to use for this repository/project. Stored for the
-  // first time when getPropertyPrefix() is called.
-  private static String mPropertyPrefix;
-
+class BumpVersionTask extends GruelTask {
   // The name of the new version (e.g. "1.2.3", or "1.0.7-abb9812")
   private String mVersionName;
-
-  // The properties object we'll be working on.
-  private Properties mProps;
-
-  // The file from which the properties object will be read initially.
-  private File mPropsFile;
 
   // A flag used to indicate that the patch number should be incremented.
   private boolean mShouldIncrementPatch = false;
@@ -153,28 +143,6 @@ class BumpVersionTask extends DefaultTask {
     return portions.collect{ it }.join(".");
   }
 
-  private Properties getProperties() {
-    if (mProps == null) {
-      def propsFile = getPropertiesFile();
-      mProps = new Properties();
-      mProps.load(propsFile.newDataInputStream());
-    }
-
-    return mProps;
-  }
-
-  private File getPropertiesFile() {
-    if (mPropsFile == null) {
-      mPropsFile = new File("gradle.properties");
-    }
-
-    if (!mPropsFile.exists()) {
-      mPropsFile.createNewFile();
-    }
-
-    return mPropsFile;
-  }
-
   private int getVersionCode() {
     Properties props = getProperties();
     return props.getProperty(getPropertyPrefix() + "_VERSION_CODE") as int;
@@ -191,20 +159,5 @@ class BumpVersionTask extends DefaultTask {
     // Remove any -ALPHA or -BETA
     currentVersionName = currentVersionName.minus("-BETA").minus("-ALPHA");
     return currentVersionName.tokenize('.').toArray();
-  }
-
-  private String getPropertyPrefix() {
-    if (mPropertyPrefix == null) {
-      Properties props = getProperties();
-      mPropertyPrefix = props.getProperty("PROPERTY_PREFIX") as String;
-    }
-
-    // If it's still null, then the user didn't specify it in the
-    // gradle.properties file, so let's use the project name in all caps.
-    if (mPropertyPrefix == null) {
-      mPropertyPrefix = project.name.toUpperCase();
-    }
-
-    return mPropertyPrefix;
   }
 }
