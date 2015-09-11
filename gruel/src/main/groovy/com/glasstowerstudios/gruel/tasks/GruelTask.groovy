@@ -1,4 +1,4 @@
-package com.glasstowerstudios.gruel.base;
+package com.glasstowerstudios.gruel.tasks;
 
 import org.gradle.api.DefaultTask
 

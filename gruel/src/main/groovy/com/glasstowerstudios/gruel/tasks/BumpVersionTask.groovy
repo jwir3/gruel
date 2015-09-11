@@ -1,9 +1,9 @@
-package com.glasstowerstudios.gruel;
+package com.glasstowerstudios.gruel.tasks;
 
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.internal.tasks.options.Option
 
-import com.glasstowerstudios.gruel.base.GruelTask;
+import com.glasstowerstudios.gruel.tasks.GruelTask;
 
 class BumpVersionTask extends GruelTask {
   // The name of the new version (e.g. "1.2.3", or "1.0.7-abb9812")
