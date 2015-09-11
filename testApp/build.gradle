@@ -3,15 +3,14 @@ apply plugin: 'maven'
 
 buildscript {
   repositories {
+    mavenCentral()
     maven {
       url uri('../repo')
     }
   }
 
   dependencies {
-    classpath group: 'com.glasstowerstudios.gruel',
-                    name: 'gruel',
-                    version: '1.0.0-SNAPSHOT'
+    classpath 'com.glasstowerstudios.gruel:gruel:0.0.1-SNAPSHOT'
   }
 }
 
@@ -19,6 +18,16 @@ apply plugin: 'gruel'
 
 repositories {
   mavenCentral()
+}
+
+hipchat {
+  auth_token = "YOUR_AUTH_TOKEN_HERE"
+}
+
+project.task('notifyHipChat', type: com.glasstowerstudios.gruel.tasks.hipchat.HipChatNotificationTask) {
+  color = 'yellow'
+  message = 'A MESSAGE'
+  channelName = 'SomeRoom'
 }
 
 jar {
