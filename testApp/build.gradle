@@ -4,9 +4,9 @@ apply plugin: 'maven'
 buildscript {
   repositories {
     mavenCentral()
-    maven {
-      url uri('../repo')
-    }
+
+    // For SNAPSHOT releases
+    maven { url "https://oss.sonatype.org/content/groups/staging" }
   }
 
   dependencies {
