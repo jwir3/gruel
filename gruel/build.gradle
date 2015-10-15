@@ -18,6 +18,7 @@ dependencies {
 
 group='com.glasstowerstudios.gruel'
 version='0.0.1-SNAPSHOT'
+sourceCompatibility=1.7
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'

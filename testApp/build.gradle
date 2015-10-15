@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 apply plugin: 'maven'
 
 buildscript {
@@ -18,6 +19,18 @@ apply plugin: 'gruel'
 
 repositories {
   mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
+
+sourceSets {
+    test {
+        groovy {
+            srcDirs = ["src/test"]
+        }
+    }
 }
 
 hipchat {
