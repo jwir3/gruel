@@ -4,6 +4,7 @@ apply plugin: 'maven'
 
 buildscript {
   repositories {
+    mavenLocal()
     mavenCentral()
 
     // For SNAPSHOT releases
@@ -32,6 +33,10 @@ sourceSets {
         }
     }
 }
+
+// gruel {
+//   renameApkPattern = "%appName%-%version%-%buildType%-%alignmentSigning%-%gitCommit%.apk"
+// }
 
 hipchat {
   auth_token = "YOUR_AUTH_TOKEN_HERE"

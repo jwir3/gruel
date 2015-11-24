@@ -4,6 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 repositories {
+  mavenLocal()
   mavenCentral()
   jcenter()
 }
