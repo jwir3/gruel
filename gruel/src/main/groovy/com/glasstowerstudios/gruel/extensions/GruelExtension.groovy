@@ -28,16 +28,19 @@ class GruelExtension {
         private static final String BUILD_TYPE = "%buildType%";
         private static final String COMMIT_HASH = "%commitHash%";
 
-        List<String> patternsToInclude;
+        List<String> mPatterns;
 
         OutputNameBuilder(List<String> patterns) {
-          patternsToInclude = patterns;
+          mPatterns = new ArrayList<>();
+          for (String nextPattern : patterns) {
+            mPatterns.add(nextPattern);
+          }
         }
 
         public OutputNameBuilder apply(String pattern, value) {
           def foundPattern = -1;
-          for (int i = 0; i < patternsToInclude.size(); i++) {
-            if (patternsToInclude[i].equals(pattern)) {
+          for (int i = 0; i < mPatterns.size(); i++) {
+            if (mPatterns[i].equals(pattern)) {
                 foundPattern = i;
                 break;
             }
@@ -46,14 +49,14 @@ class GruelExtension {
           if (foundPattern >= 0) {
             if (value == null) {
               // Then replace the pattern with an empty string
-              patternsToInclude.remove(foundPattern);
+              mPatterns.remove(foundPattern);
               return;
             }
 
             String strVal = value.toString();
             if (!strVal.isEmpty()) {
               def effectiveSeparator = foundPattern == 0 ? "" : separator;
-              patternsToInclude[foundPattern] = effectiveSeparator + strVal;
+              mPatterns[foundPattern] = effectiveSeparator + strVal;
             }
           }
 
@@ -86,7 +89,7 @@ class GruelExtension {
 
         public String build() {
           StringBuilder archiveName = new StringBuilder();
-          for (String next : patternsToInclude) {
+          for (String next : mPatterns) {
             archiveName.append(next);
           }
 
@@ -119,14 +122,31 @@ class GruelExtension {
     public adjustOutputSettings(Project aProject) {
       project = aProject;
 
-      OutputNameBuilder bldr = new OutputNameBuilder(patternsToInclude);
-      bldr.applyAppName(appName);
-      bldr.applyVersion(version);
-      bldr.applyBuildType(buildType);
-      bldr.applyCommitHash(commitHash);
-
-      if (project.jar != null) {
+      if (project.hasProperty('jar')) {
+        OutputNameBuilder bldr = new OutputNameBuilder(patternsToInclude);
+        bldr.applyAppName(appName);
+        bldr.applyVersion(version);
+        bldr.applyCommitHash(commitHash);
+        bldr.applyBuildType(buildType);
         project.jar.archiveName = bldr.build() + "." + project.jar.extension
+      } else if (project.hasProperty('android')) {
+        project.android.applicationVariants.all { variant ->
+          variant.outputs.each { output ->
+            OutputNameBuilder bldr = new OutputNameBuilder(patternsToInclude);
+            bldr.applyAppName(appName)
+            bldr.applyVersion(version)
+            bldr.applyCommitHash(commitHash)
+            bldr.applyBuildType(variant.getBaseName())
+
+            File apk = output.outputFile
+            String newName = bldr.build();
+            output.outputFile = new File(apk.parentFile, newName + ".apk")
+
+            if (variant.buildType.zipAlignEnabled) {
+              output.packageApplication.outputFile = new File(output.packageApplication.outputFile.parentFile, newName + "-unaligned.apk");
+            }
+          }
+        }
       }
     }
 
