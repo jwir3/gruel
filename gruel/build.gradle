@@ -4,6 +4,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 repositories {
+  mavenLocal()
   mavenCentral()
   jcenter()
 }
@@ -16,8 +17,6 @@ dependencies {
     compile 'io.reactivex:rxjava-debug:1.0.1'
 }
 
-group='com.glasstowerstudios.gruel'
-version='0.0.1-SNAPSHOT'
 sourceCompatibility=1.7
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

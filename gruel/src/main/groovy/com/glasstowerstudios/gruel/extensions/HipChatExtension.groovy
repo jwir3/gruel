@@ -7,11 +7,6 @@ package com.glasstowerstudios.gruel.extensions;
  * For the HipChat extension, the token must always be provided.
  */
 class HipChatExtension {
-
-    public HipChatExtension(auth_token) {
-      this.auth_token = auth_token;
-    }
-
     String auth_token;
 
     String getAuthToken() {

@@ -6,6 +6,7 @@ A suite of tools for making Gradle builds nice and smooth.
 
 - Notify a HipChat channel with a specific message.
 - Bump version numbers in a `gradle.properties` file to conform with semantic versioning.
+- Specify a final archive pattern for Java (JAR) and Android (APK) archives.
 
 ## Installation
 Currently, `gruel` is available on the maven central staging repository. Keep in mind, it's in an alpha stage, meaning that it is somewhat unstable yet.
@@ -116,6 +117,38 @@ TESTAPP_VERSION_NAME=2.1.1
 Notice that the `--major` and `--minor` version bumps also bump the version code by a factor of 10, allowing room for hotfix releases between these versions.
 
 There are other useful options for the `bumpVerson` task. You can read about them with `gradle help --task bumpVersion`.
+
+### Naming Build Outputs
+Adjusting the name of the final output file for Android builds is somewhat complicated. Instead of adding
+a bunch of boilerplate code to your `build.gradle` file for each Android project you have, you can
+include gruel and specify a pattern:
+```groovy
+apply plugin: 'gruel'
+
+gruel {
+  archiveName "%appName%", "%version%", "%buildType%", "%commitHash%"
+  version android.defaultConfig.versionName
+  commitHash gitSha()
+}
+```
+
+The following variables can be defined:
+
+| Variable Name | Description                        | Default Value |
+| ------------- | ---------------------------------- | ------------- |
+| `%appName%`   | The name of the application.       |  Default module (directory) name |
+| `%version%`   | The human-readable version of the application. | `android.defaultConfig.versionName` |
+| `%buildType%` | The type of the build (debug or release). | None |
+| `%commitHash%`| The unique identifier of the current HEAD commit. | None |
+
+Gruel provides a method `gitSha(String tagName)` for you to use to retrieve the hash of a named
+`git` commit. You can use it within the `gruel` configuration by simply calling the function by name,
+as in the above example. (`gitSha()` is equivalent to running `gitSha('HEAD')`). If you wish to use this function outside of the gruel configuration block, you can invoke it using `gruel.gitSha(tagName)` once the gruel plugin has been applied.
+
+The output APK will be named to conform to this pattern, in the order of parameters specified.
+
+Adjusting the name of the final output file is pretty easy in gradle when building Java archives (jar files).
+It's provided by gruel simply for consistency between standard java and Android applications.
 
 ## FAQ
 - __Where did the name come from?__
