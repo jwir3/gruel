@@ -9,10 +9,14 @@ import org.gradle.api.Project;
 
 public class GruelPlugin implements Plugin<Project> {
   void apply (Project aProject) {
-    aProject.extensions.create("gruel", GruelExtension);
+    def gruelExtension = aProject.extensions.create("gruel", GruelExtension);
     aProject.extensions.create("hipchat", HipChatExtension);
 
     aProject.task('bumpVersion', type: BumpVersionTask, description: 'Bumps the version number of the current release.', group: 'Management') << {
+    }
+
+    aProject.afterEvaluate {
+      gruelExtension.adjustOutputSettings(aProject);
     }
   }
 }

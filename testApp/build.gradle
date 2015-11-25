@@ -2,6 +2,8 @@ apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
+project.version TESTAPP_VERSION_NAME
+
 buildscript {
   repositories {
     mavenLocal()
@@ -12,7 +14,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.glasstowerstudios.gruel:gruel:0.0.1-SNAPSHOT'
+    classpath "com.glasstowerstudios.gruel:gruel:${GRUEL_VERSION}"
   }
 }
 
@@ -34,9 +36,11 @@ sourceSets {
     }
 }
 
-// gruel {
-//   renameApkPattern = "%appName%-%version%-%buildType%-%alignmentSigning%-%gitCommit%.apk"
-// }
+gruel {
+  archiveName "%appName%", "%version%", "%buildType%", "%commitHash%"
+  buildType "release"
+  commitHash gitSha()
+}
 
 hipchat {
   auth_token = "YOUR_AUTH_TOKEN_HERE"
