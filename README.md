@@ -153,3 +153,27 @@ It's provided by gruel simply for consistency between standard java and Android 
 ## FAQ
 - __Where did the name come from?__
   - The name actually had several iterations. Since it's a suite of tools that can be used immediately from the start of a project, it was called 'cradle', but this didn't seem incredibly descriptive, so it then was changed to 'gradlecradle'. This seemed too long, so the name was changed to 'grools', from "gradle" + "tools". From here, "gruel" seemed better, since it helps smooth out the process of starting a project, and because we didn't want to confuse it with "drools" (a business rules management system).
+
+- __I'm getting an error similar to the following:__
+
+  ```
+  * What went wrong:
+  A problem was found with the configuration of task ':app:zipalignDebug'.
+  > File '/somepath/myproject/app/build/outputs/apk/rucksack-debug-unaligned.apk' specified for property 'inputFile' does not exist.
+
+  * Try:
+  Run with --stacktrace option to get the stack trace. Run with   --info or --debug option to get more log output.
+
+  BUILD FAILED
+  ```
+  - This is a bug in the Android gradle plugin v1.3.0. Don't use this version. Instead, use version 1.3.1. Change the following line:
+
+    ```
+      classpath 'com.android.tools.build:gradle:1.3.0'
+
+    ```
+  to:
+
+    ```
+    classpath 'com.android.tools.build:gradle:1.3.1'
+    ```
