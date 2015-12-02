@@ -18,9 +18,6 @@ class BumpVersionTask extends GruelTask {
   // A flag used to indicate that the major number should be incremented.
   private boolean mShouldIncrementMajor = false;
 
-  // A flag used to indicate whether we are creating a new beta release.
-  private boolean mIsBetaRelease = false;
-
   // The version code. This will always increment by one, since it MUST remain
   // monotonically increasing.
   private int mVersionCode;
@@ -32,16 +29,6 @@ class BumpVersionTask extends GruelTask {
       mShouldIncrementMinor = false;
       mShouldIncrementMinor = false;
     }
-  }
-
-  @Option(option = "betaRelease", description = "Adjust the release name to indicate this is a beta release")
-  def setBetaRelease(boolean aIsBetaRelease) {
-      mIsBetaRelease = aIsBetaRelease;
-      if (mIsBetaRelease) {
-        mShouldIncrementMajor = false;
-        mShouldIncrementMinor = false;
-        mShouldIncrementMinor = false;
-      }
   }
 
   @Option(option = "versionName", description = "Full version name parameter to use")
@@ -101,14 +88,10 @@ class BumpVersionTask extends GruelTask {
       mVersionName = getUnchangedVersionName();
     }
 
-    if (mIsBetaRelease) {
-      mVersionName = mVersionName + "-BETA";
-    }
-
     props.setProperty(getPropertyPrefix() + "_VERSION_NAME", mVersionName as String);
     props.setProperty(getPropertyPrefix() + "_VERSION_CODE", mVersionCode as String);
 
-    props.store(getPropertiesFile().newWriter(), null);
+    storeNewProperties(props);
   }
 
   private String getUnchangedVersionName() {
@@ -159,5 +142,50 @@ class BumpVersionTask extends GruelTask {
     // Remove any -ALPHA or -BETA
     currentVersionName = currentVersionName.minus("-BETA").minus("-ALPHA");
     return currentVersionName.tokenize('.').toArray();
+  }
+
+  private void storeNewProperties(Properties newProps) {
+    def currentPropsFile = new File(project.getRootDir(), 'gradle.properties')
+    if (currentPropsFile.exists()) {
+      // Read each line of the file and replace the given properties with new
+      // ones.
+      def lines = new ArrayList<String>();
+      currentPropsFile.eachLine { line ->
+        def lineWithoutPrecedingSpaces = line.stripIndent()
+        def indent = line.size() - lineWithoutPrecedingSpaces.size()
+        if (!lineWithoutPrecedingSpaces.isEmpty()
+            && !lineWithoutPrecedingSpaces.startsWith('#')) {
+          String lineContents = line.replaceAll(/\s/, "")
+          def prop = BumpVersionTask.translateLineToProperty(lineContents);
+          for (String key : newProps.stringPropertyNames()) {
+            if (prop.get(key) != null) {
+              prop.put(key, newProps.get(key));
+            }
+          }
+
+          def newPropLine = BumpVersionTask.translatePropertyToLine(prop, indent);
+          lines.add(newPropLine);
+        } else {
+          lines.add(lineWithoutPrecedingSpaces);
+        }
+      }
+
+      def newPropsFile = new File(project.getRootDir(), 'gradle.properties')
+      newPropsFile.newWriter().withWriter { w ->
+        w << lines.toArray().join('\n')
+      }
+    }
+  }
+
+  private static String translatePropertyToLine(Map<String, String> prop, int indent) {
+    def propComponentArray = [prop.keySet().toArray()[0], prop.values().getAt(0)];
+    return ' '*indent + propComponentArray.join("=")
+  }
+
+  private static Map<String, String> translateLineToProperty(line) {
+    def prop = new HashMap<String, String>();
+    def splitString = line.split("=");
+    prop.put(splitString[0], splitString[1]);
+    return prop;
   }
 }
