@@ -116,7 +116,7 @@ TESTAPP_VERSION_NAME=2.1.1
 
 Notice that the `--major` and `--minor` version bumps also bump the version code by a factor of 10, allowing room for hotfix releases between these versions.
 
-There are other useful options for the `bumpVerson` task. You can read about them with `gradle help --task bumpVersion`.
+There are other useful options for the `bumpVersion` task. You can read about them with `gradle help --task bumpVersion`.
 
 ### Naming Build Outputs
 Adjusting the name of the final output file for Android builds is somewhat complicated. Instead of adding
