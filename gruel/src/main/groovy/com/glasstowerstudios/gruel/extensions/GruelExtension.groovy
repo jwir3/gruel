@@ -1,6 +1,9 @@
-package com.glasstowerstudios.gruel.extensions;
+package com.glasstowerstudios.gruel.extensions
 
-import org.gradle.api.Project;
+import org.gradle.api.Project
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 /**
  * Plugin extension file. This allows specific parameters to be defined in the
@@ -170,5 +173,16 @@ class GruelExtension {
     public String gitSha(String aTag) {
       def command = "git rev-list --max-count=1 --abbrev-commit ${aTag}"
       return "${command}".execute().text.trim()
+    }
+
+    /**
+     * Retrieve a timestamp in ISO 8601 format
+     * @return A timestamp for the current date/time
+     */
+    public String timestamp() {
+      TimeZone tz = TimeZone.getTimeZone("UTC")
+      DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+      df.setTimeZone(tz);
+      return df.format(new Date())
     }
 }
