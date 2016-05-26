@@ -5,6 +5,7 @@ A suite of tools for making Gradle builds nice and smooth.
 **Currently, `gruel` adds tasks to your gradle build to do the following:**
 
 - Notify a HipChat channel with a specific message.
+- Transition Jira issues matching a JQL filter to another status and update fields. This is useful in automating the transition to the appropriate QA status when an alpha build is ready for testing.
 - Bump version numbers in a `gradle.properties` file to conform with semantic versioning.
 - Specify a final archive pattern for Java (JAR) and Android (APK) archives.
 
@@ -60,6 +61,25 @@ task notifyHipchat(type: com.glasstowerstudios.gruel.tasks.hipchat.HipChatNotifi
 Now, to run this task, you can run:
 ```bash
 $ gradle notifyHipchat
+```
+
+### Jira Issue Transitions
+
+Create a task with the following template:
+```groovy
+task jiraUpdate(type: com.glasstowerstudios.gruel.tasks.jira.JiraTransitionTask) {
+  userName = JIRA_USERNAME
+  password = JIRA_PASSWORD
+  jiraRootUrl = 'https://COMPANY.atlassian.net'
+  jql = 'project = "PROJECT_NAME" AND status = "CURRENT_STATUS"'
+  toStatus = 'NEW_STATUS'
+  fieldUpdates = ['customfield_123': 'Updating a custom field', 'customfield_456': 'Updating another custom field']
+}
+```
+
+Now, to run this task, you can run:
+```bash
+$ gradle jiraUpdate
 ```
 
 ### Bumping Versions
@@ -142,8 +162,11 @@ The following variables can be defined:
 | `%commitHash%`| The unique identifier of the current HEAD commit. | None |
 
 Gruel provides a method `gitSha(String tagName)` for you to use to retrieve the hash of a named
-`git` commit. You can use it within the `gruel` configuration by simply calling the function by name,
-as in the above example. (`gitSha()` is equivalent to running `gitSha('HEAD')`). If you wish to use this function outside of the gruel configuration block, you can invoke it using `gruel.gitSha(tagName)` once the gruel plugin has been applied.
+`git` commit and a `timestamp()` method to output the current time in ISO 8601 format. You can use
+these within the `gruel` configuration by simply calling the function by name, as in the above
+example. (`gitSha()` is equivalent to running `gitSha('HEAD')`). If you wish to use these functions
+outside of the gruel configuration block, you can invoke them using `gruel.gitSha(tagName)` once the
+gruel plugin has been applied.
 
 The output APK will be named to conform to this pattern, in the order of parameters specified.
 
