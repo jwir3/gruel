@@ -14,7 +14,7 @@ class JiraTransitionTask extends GruelTask {
   private jiraRootUrl
   private jql
   private toStatus
-  private fieldUpdates
+  private fieldUpdates = new LinkedHashMap<String, Object>()
 
   void setUserName(String userName) {
     this.userName = userName
@@ -47,14 +47,11 @@ class JiraTransitionTask extends GruelTask {
     def result = Issue.search(client.getRestClient(), jql)
 
     for (Issue issue : result.issues) {
-      FluentTransition fluentTransition
+      FluentTransition fluentTransition = issue.transition()
       for(Map.Entry<String, Object> entry : fieldUpdates.entrySet()) {
-        if (!fluentTransition) {
-          fluentTransition = issue.transition()
-        }
         fluentTransition.field(entry.getKey(), entry.getValue())
       }
-      fluentTransition?.execute(toStatus)
+      fluentTransition.execute(toStatus)
     }
   }
 }
