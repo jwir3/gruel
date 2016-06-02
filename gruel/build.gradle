@@ -15,6 +15,7 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:1.6.1'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'io.reactivex:rxjava-debug:1.0.1'
+    compile 'net.rcarz:jira-client:0.5'
 }
 
 sourceCompatibility=1.7
