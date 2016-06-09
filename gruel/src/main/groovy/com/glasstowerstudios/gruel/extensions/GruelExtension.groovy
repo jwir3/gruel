@@ -21,6 +21,8 @@ class GruelExtension {
     String buildType;
     String commitHash;
 
+    boolean willAdjustOutputSettings = false;
+
     /**
      * A builder for output name patterns.
      */
@@ -111,10 +113,24 @@ class GruelExtension {
      *        file name.
      */
     public archiveName(String[] aPattern) {
+      if (aPattern.length != 0) {
+        this.willAdjustOutputSettings = true;
+      }
+
       patternsToInclude = new ArrayList<String>();
       for(String next : aPattern) {
         patternsToInclude.add(next);
       }
+    }
+
+    /**
+     * Determine if Gruel should adjust archive output settings.
+     *
+     * @return true, if the build configuration has specified a new archive
+     *         naming pattern; false, otherwise.
+     */
+    public shouldAdjustOutputSettings() {
+      return this.willAdjustOutputSettings;
     }
 
     /**

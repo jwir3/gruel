@@ -16,7 +16,9 @@ public class GruelPlugin implements Plugin<Project> {
     }
 
     aProject.afterEvaluate {
-      gruelExtension.adjustOutputSettings(aProject);
+      if (gruelExtension.shouldAdjustOutputSettings()) {
+        gruelExtension.adjustOutputSettings(aProject);
+      }
     }
   }
 }
