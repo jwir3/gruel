@@ -24,6 +24,10 @@ class GruelExtension {
 
     boolean willAdjustOutputSettings = false;
 
+    // The timestamp is cached from the first time it's used in a build so
+    // it doesn't change throughout the build.
+    String cachedTimestamp;
+
     /**
      * A builder for output name patterns.
      */
@@ -208,9 +212,13 @@ class GruelExtension {
      * @return A timestamp for the current date/time
      */
     public String timestamp() {
-      TimeZone tz = TimeZone.getTimeZone("UTC")
-      DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
-      df.setTimeZone(tz);
-      return df.format(new Date())
+      if (cachedTimestamp == null) {
+        TimeZone tz = TimeZone.getTimeZone("UTC")
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+        df.setTimeZone(tz);
+        cachedTimestamp = df.format(new Date())
+      }
+
+      return cachedTimestamp;
     }
 }
