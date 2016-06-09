@@ -30,7 +30,7 @@ android {
 apply plugin: 'gruel'
 
 gruel {
-  archiveName "%appName%", "%version%", "%buildType%", "%commitHash%"
+  archiveName "%appName%", "%version%", "%buildType%", "%commitHash%", "%timestamp%"
   version android.defaultConfig.versionName
   commitHash gitSha()
 }

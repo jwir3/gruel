@@ -20,6 +20,7 @@ class GruelExtension {
     String version;
     String buildType;
     String commitHash;
+    String timestamp;
 
     boolean willAdjustOutputSettings = false;
 
@@ -32,6 +33,7 @@ class GruelExtension {
         private static final String VERSION = "%version%";
         private static final String BUILD_TYPE = "%buildType%";
         private static final String COMMIT_HASH = "%commitHash%";
+        private static final String TIMESTAMP = "%timestamp%";
 
         List<String> mPatterns;
 
@@ -92,6 +94,14 @@ class GruelExtension {
           return apply(COMMIT_HASH, aCommitHash);
         }
 
+        public OutputNameBuilder applyTimestamp(aFormattedTimestamp) {
+          if (timestamp == null) {
+            timestamp = timestamp();
+          }
+
+          return apply(TIMESTAMP, aFormattedTimestamp);
+        }
+
         public String build() {
           StringBuilder archiveName = new StringBuilder();
           for (String next : mPatterns) {
@@ -147,6 +157,7 @@ class GruelExtension {
         bldr.applyVersion(version);
         bldr.applyCommitHash(commitHash);
         bldr.applyBuildType(buildType);
+        bldr.applyTimestamp(timestamp);
         project.jar.archiveName = bldr.build() + "." + project.jar.extension
       } else if (project.hasProperty('android')) {
         project.android.applicationVariants.all { variant ->
@@ -156,6 +167,7 @@ class GruelExtension {
             bldr.applyVersion(version)
             bldr.applyCommitHash(commitHash)
             bldr.applyBuildType(variant.getBaseName())
+            bldr.applyTimestamp(timestamp);
 
             File apk = output.outputFile
             String newName = bldr.build();

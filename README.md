@@ -160,6 +160,7 @@ The following variables can be defined:
 | `%version%`   | The human-readable version of the application. | `android.defaultConfig.versionName` |
 | `%buildType%` | The type of the build (debug or release). | None |
 | `%commitHash%`| The unique identifier of the current HEAD commit. | None |
+| `%timestamp%` | A timestamp for the release, in ISO-8601 format. | Current date/time, in ISO-8601 format |
 
 Gruel provides a method `gitSha(String tagName)` for you to use to retrieve the hash of a named
 `git` commit and a `timestamp()` method to output the current time in ISO 8601 format. You can use
