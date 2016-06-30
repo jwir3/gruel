@@ -21,6 +21,7 @@ class GruelExtension {
     String buildType;
     String commitHash;
     String timestamp;
+    String codeName;
 
     boolean willAdjustOutputSettings = false;
 
@@ -38,6 +39,7 @@ class GruelExtension {
         private static final String BUILD_TYPE = "%buildType%";
         private static final String COMMIT_HASH = "%commitHash%";
         private static final String TIMESTAMP = "%timestamp%";
+        private static final String CODE_NAME = "%codeName%";
 
         List<String> mPatterns;
 
@@ -74,6 +76,14 @@ class GruelExtension {
           return this;
         }
 
+        public OutputNameBuilder applyCodeName(aCodeName) {
+          if (aCodeName == null) {
+            aCodeName = "";
+          }
+
+          return apply(CODE_NAME, aCodeName);
+        }
+
         public OutputNameBuilder applyAppName(aAppName) {
           if (aAppName == null) {
             aAppName = project.getName();
@@ -106,13 +116,30 @@ class GruelExtension {
           return apply(TIMESTAMP, aFormattedTimestamp);
         }
 
+        public OutputNameBuilder applyNonVariableData() {
+          for (String next : mPatterns) {
+            if (!next.startsWith("%") && !next.endsWith("%")) {
+              apply(next, next);
+            }
+          }
+
+          return this;
+        }
+
         public String build() {
           StringBuilder archiveName = new StringBuilder();
           for (String next : mPatterns) {
-            archiveName.append(next);
+            if (!next.startsWith("%") && !next.endsWith("%")) {
+              archiveName.append(next);
+            }
           }
 
-          return archiveName.toString();
+          String finalName = archiveName.toString();
+          if (finalName.startsWith(separator)) {
+            finalName = finalName.substring(1, finalName.size());
+          }
+
+          return finalName;
         }
     }
 
@@ -148,6 +175,34 @@ class GruelExtension {
     }
 
     /**
+     * Adjust the version name of a given android project.
+     *
+     * @param aProject The project for which to adjust the version name.
+     */
+    public adjustVersionNameSettings(Project aProject) {
+      if (aProject.hasProperty("android")) {
+        aProject.android.applicationVariants.all { variant ->
+          if (variant.productFlavors[0].ext.has("gruelVersionName")) {
+            // aProject.android.buildTypes.each { type ->
+              List<String> versionNamePatterns = variant.productFlavors.get(0).ext.gruelVersionName;
+              OutputNameBuilder bldr = new OutputNameBuilder(versionNamePatterns);
+              bldr.applyNonVariableData();
+              bldr.applyAppName(appName)
+              bldr.applyVersion(version)
+              bldr.applyCodeName(codeName);
+              bldr.applyCommitHash(commitHash)
+              bldr.applyBuildType(variant.getBaseName())
+              bldr.applyTimestamp(timestamp);
+
+              // println "Applying : " + bldr.build() + " as version name suffix for variant: " + variant
+
+              variant.mergedFlavor.versionName = bldr.build();
+            // }
+          }
+        }
+      }
+    }
+    /**
      * Adjust the name of the output file for a given project.
      *
      * @param aProject The project for which to adjust the output file name.
@@ -157,8 +212,10 @@ class GruelExtension {
 
       if (project.hasProperty('jar')) {
         OutputNameBuilder bldr = new OutputNameBuilder(patternsToInclude);
+        bldr.applyNonVariableData();
         bldr.applyAppName(appName);
         bldr.applyVersion(version);
+        bldr.applyCodeName(codeName);
         bldr.applyCommitHash(commitHash);
         bldr.applyBuildType(buildType);
         bldr.applyTimestamp(timestamp);
@@ -167,8 +224,10 @@ class GruelExtension {
         project.android.applicationVariants.all { variant ->
           variant.outputs.each { output ->
             OutputNameBuilder bldr = new OutputNameBuilder(patternsToInclude);
+            bldr.applyNonVariableData();
             bldr.applyAppName(appName)
             bldr.applyVersion(version)
+            bldr.applyCodeName(codeName);
             bldr.applyCommitHash(commitHash)
             bldr.applyBuildType(variant.getBaseName())
             bldr.applyTimestamp(timestamp);
@@ -205,6 +264,14 @@ class GruelExtension {
     public String gitSha(String aTag) {
       def command = "git rev-list --max-count=1 --abbrev-commit ${aTag}"
       return "${command}".execute().text.trim()
+    }
+
+    public void codeName(String codeName) {
+      this.codeName = codeName;
+    }
+
+    public String getCodeName() {
+      return this.codeName;
     }
 
     /**
