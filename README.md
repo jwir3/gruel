@@ -146,7 +146,7 @@ include gruel and specify a pattern:
 apply plugin: 'gruel'
 
 gruel {
-  archiveName "%appName%", "%version%", "%buildType%", "%commitHash%"
+  archiveName "%appName%", "%version%", "%codeName", "%buildType%", "%commitHash%"
   version android.defaultConfig.versionName
   commitHash gitSha()
 }
@@ -158,9 +158,12 @@ The following variables can be defined:
 | ------------- | ---------------------------------- | ------------- |
 | `%appName%`   | The name of the application.       |  Default module (directory) name |
 | `%version%`   | The human-readable version of the application. | `android.defaultConfig.versionName` |
+| `%codeName`   | An optional code name for the release. | Empty |
 | `%buildType%` | The type of the build (debug or release). | None |
 | `%commitHash%`| The unique identifier of the current HEAD commit. | None |
 | `%timestamp%` | A timestamp for the release, in ISO-8601 format. | Current date/time, in ISO-8601 format |
+
+Any string that is not prefixed and suffixed with "%" will be treated as a literal, and not replaced by gruel.
 
 Gruel provides a method `gitSha(String tagName)` for you to use to retrieve the hash of a named
 `git` commit and a `timestamp()` method to output the current time in ISO 8601 format. You can use
@@ -173,6 +176,23 @@ The output APK will be named to conform to this pattern, in the order of paramet
 
 Adjusting the name of the final output file is pretty easy in gradle when building Java archives (jar files).
 It's provided by gruel simply for consistency between standard java and Android applications.
+
+Android Version Name Specification
+------------------------------
+In a similar way to setting the output file name using gruel, you can also set the `versionName` property dynamically using gruel:
+
+```
+android {
+  productFlavors {
+    ...
+    production {
+      ext.gruelVersionName = ["%version%", "%codeName%", "ALPHA"]
+    }
+  }
+}
+```
+
+The above script will produce "1.0.0-Xavier-ALPHA" as a version name, if `version` is `1.0.0` and `codeName` is `Xavier`. You can use any variables in the above table to populate your version name.
 
 ## FAQ
 - __Where did the name come from?__

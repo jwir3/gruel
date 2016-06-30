@@ -8,21 +8,21 @@ android {
     applicationId "com.glasstowerstudios.testapp"
     minSdkVersion 14
     targetSdkVersion 23
-    versionCode 1
-    versionName "1.0"
+    versionCode project.TESTAPP_VERSION_CODE as int
+    versionName project.TESTAPP_VERSION_NAME
   }
 
   productFlavors {
     alpha {
-      versionName android.defaultConfig.versionName + "-ALPHA"
+      ext.gruelVersionName = ["%version%", "%codeName%", "ALPHA"]
     }
 
     beta {
-      versionName android.defaultConfig.versionName + "-BETA"
+      ext.gruelVersionName = ["%version%", "%codeName%", "BETA"]
     }
 
     prod {
-      versionName android.defaultConfig.versionName
+      ext.gruelVersionName = ["%version%"]
     }
   }
 }
@@ -30,9 +30,10 @@ android {
 apply plugin: 'gruel'
 
 gruel {
-  archiveName "%appName%", "%version%", "%buildType%", "%commitHash%", "%timestamp%"
+  archiveName "%appName%", "%version%", "%codeName%", "%buildType%", "%commitHash%"
   version android.defaultConfig.versionName
   commitHash gitSha()
+  codeName TESTAPP_CODE_NAME
 }
 
 dependencies {
