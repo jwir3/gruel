@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+apply plugin: 'gruel'
+
 android {
   compileSdkVersion 23
   buildToolsVersion "23.0.1"
@@ -15,10 +17,15 @@ android {
   productFlavors {
     alpha {
       ext.gruelVersionName = ["%version%", "%codeName%", "ALPHA"]
+      gruel.uploadUsing 'crashlytics', delegate
+      // uploadUsing 'crashlytics'
+      // uploadGroup 'Alpha'
     }
 
     beta {
       ext.gruelVersionName = ["%version%", "%codeName%", "BETA"]
+      gruel.uploadUsing 'crashlytics', delegate
+      // uploadGroup 'Beta'
     }
 
     prod {
@@ -26,8 +33,6 @@ android {
     }
   }
 }
-
-apply plugin: 'gruel'
 
 gruel {
   archiveName "%appName%", "%version%", "%codeName%", "%buildType%", "%commitHash%"

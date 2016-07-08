@@ -1,9 +1,12 @@
 package com.glasstowerstudios.gruel.extensions
 
 import org.gradle.api.Project
+import org.gradle.api.Task;
+import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.NamedDomainObjectContainer;
 
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * Plugin extension file. This allows specific parameters to be defined in the
@@ -274,6 +277,10 @@ class GruelExtension {
       return this.codeName;
     }
 
+    void setProject(Project aProject) {
+      project = aProject;
+    }
+
     /**
      * Retrieve a timestamp in ISO 8601 format
      * @return A timestamp for the current date/time
@@ -287,5 +294,26 @@ class GruelExtension {
       }
 
       return cachedTimestamp;
+    }
+
+    public uploadUsing(String type, Object aFlavor) {
+      // Add a task for each of the flavors for uploading.
+      if (project.hasProperty('android')) {
+        if (type.toLowerCase().equals('crashlytics')) {
+          setupCrashlyticsUploadTask(aFlavor)
+        }
+      }
+    }
+
+    private setupCrashlyticsUploadTask(Object aFlavor) {
+      String flavorName = aFlavor.name;
+      TaskContainer taskContainer = project.getTasks();
+      Task createdTask = taskContainer.create("upload"
+        + flavorName.capitalize());
+      String aAn = "aeiou".indexOf((Character.toLowerCase(flavorName.charAt(0)).toString())) >= 0 ? "an" : "a";
+      createdTask.description = "Upload " + aAn + " " + flavorName + " release to Crashlytics Beta"
+      createdTask << {
+        println "Hello " + flavorName + " world!"
+      }
     }
 }
