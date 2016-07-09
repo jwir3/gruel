@@ -185,7 +185,9 @@ class GruelExtension {
     public adjustVersionNameSettings(Project aProject) {
       if (aProject.hasProperty("android")) {
         aProject.android.applicationVariants.all { variant ->
-          if (variant.productFlavors[0].ext.has("gruelVersionName")) {
+          if (variant.productFlavors != null
+              && variant.productFlavors[0] != null
+              && variant.productFlavors[0].ext.has("gruelVersionName")) {
             // aProject.android.buildTypes.each { type ->
               List<String> versionNamePatterns = variant.productFlavors.get(0).ext.gruelVersionName;
               OutputNameBuilder bldr = new OutputNameBuilder(versionNamePatterns);

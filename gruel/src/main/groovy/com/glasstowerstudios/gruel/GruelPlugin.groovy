@@ -11,7 +11,7 @@ public class GruelPlugin implements Plugin<Project> {
   void apply (Project aProject) {
     def gruelExtension = aProject.extensions.create("gruel", GruelExtension);
     gruelExtension.setProject(aProject);
-    
+
     aProject.extensions.create("hipchat", HipChatExtension);
 
     aProject.task('bumpVersion', type: BumpVersionTask, description: 'Bumps the version number of the current release.', group: 'Management') << {
