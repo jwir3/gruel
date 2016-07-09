@@ -85,7 +85,9 @@ class BumpVersionTask extends GruelTask {
       mVersionCode = currentVersionCode + 1;
     } else {
       mVersionCode = currentVersionCode + 1;
-      mVersionName = getUnchangedVersionName();
+      if (mVersionName == null) {
+        mVersionName = getUnchangedVersionName()
+      }
     }
 
     props.setProperty(getPropertyPrefix() + "_VERSION_NAME", mVersionName as String);
