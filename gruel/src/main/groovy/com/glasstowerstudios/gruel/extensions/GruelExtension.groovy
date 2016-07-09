@@ -1,9 +1,13 @@
 package com.glasstowerstudios.gruel.extensions
 
 import org.gradle.api.Project
+import org.gradle.api.Task;
+import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.NamedDomainObjectContainer;
+import org.gradle.api.UnknownTaskException;
 
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * Plugin extension file. This allows specific parameters to be defined in the
@@ -182,7 +186,9 @@ class GruelExtension {
     public adjustVersionNameSettings(Project aProject) {
       if (aProject.hasProperty("android")) {
         aProject.android.applicationVariants.all { variant ->
-          if (variant.productFlavors[0].ext.has("gruelVersionName")) {
+          if (variant.productFlavors != null
+              && variant.productFlavors[0] != null
+              && variant.productFlavors[0].ext.has("gruelVersionName")) {
             // aProject.android.buildTypes.each { type ->
               List<String> versionNamePatterns = variant.productFlavors.get(0).ext.gruelVersionName;
               OutputNameBuilder bldr = new OutputNameBuilder(versionNamePatterns);
@@ -274,6 +280,10 @@ class GruelExtension {
       return this.codeName;
     }
 
+    void setProject(Project aProject) {
+      project = aProject;
+    }
+
     /**
      * Retrieve a timestamp in ISO 8601 format
      * @return A timestamp for the current date/time
@@ -287,5 +297,118 @@ class GruelExtension {
       }
 
       return cachedTimestamp;
+    }
+
+    /**
+     * Setup the task for uploading an assembled product.
+     *
+     * This will create a new task, uploadXXXXX, where XXXXX is the name of the
+     * product flavor for which the upload task is being created. This version
+     * will use the debug version of the package to upload, and it will not set
+     * users to which the distribution will be sent.
+     *
+     * @param type The name of the distribution mechanism to use. Currently, only
+     *        'crashlytics' is supported.
+     * @param flavor The ProductFlavor for which this task is being created. This
+     *        is an {@link Object} to prevent us from having to include the
+     *        Android Gradle Plugin in this plugin.
+     */
+    public uploadUsing (String type, Object flavor) {
+      uploadUsing(type, null, flavor)
+    }
+
+    /**
+     * Setup the task for uploading an assembled product.
+     *
+     * This will create a new task, uploadXXXXX, where XXXXX is the name of the
+     * product flavor for which the upload task is being created. This version
+     * will use the debug version of the package to upload.
+     *
+     * @param type The name of the distribution mechanism to use. Currently, only
+     *        'crashlytics' is supported.
+     * @param groupName The name of the group of users to notify of a new
+     *        distribution. This must be setup in Crashlytics before the task is
+     *        executed.
+     * @param flavor The ProductFlavor for which this task is being created. This
+     *        is an {@link Object} to prevent us from having to include the
+     *        Android Gradle Plugin in this plugin.
+     */
+    public uploadUsing(String type, String groupName, Object flavor) {
+      uploadUsing(type, groupName, 'debug', flavor);
+    }
+
+    /**
+     * Setup the task for uploading an assembled product.
+     *
+     * This will create a new task, uploadXXXXX, where XXXXX is the name of the
+     * product flavor for which the upload task is being created.
+     *
+     * @param type The name of the distribution mechanism to use. Currently, only
+     *        'crashlytics' is supported.
+     * @param groupName The name of the group of users to notify of a new
+     *        distribution. This must be setup in Crashlytics before the task is
+     *        executed.
+     * @param distributionType The type of distribution (e.g. 'release'). Must be
+     *        one of the android.buildTypes, or 'debug' will be used. Defaults to
+     *        'debug'.
+     * @param flavor The ProductFlavor for which this task is being created. This
+     *        is an {@link Object} to prevent us from having to include the
+     *        Android Gradle Plugin in this plugin.
+     */
+    public uploadUsing(String type, String groupName, String distributionType,
+                       Object flavor) {
+      // Add a task for each of the flavors for uploading.
+      if (project.hasProperty('android')) {
+        String effectiveDistributionType = 'Debug';
+        project.android.buildTypes.each { buildType ->
+          if (buildType.name.equalsIgnoreCase(distributionType)) {
+            effectiveDistributionType = distributionType.capitalize();
+          }
+        }
+
+       if (type.toLowerCase().equals('crashlytics')) {
+         setupCrashlyticsUploadTask(groupName, effectiveDistributionType,
+                                    flavor)
+       }
+      }
+    }
+
+    /**
+     * Setup the task for uploading an assembled product to Crashlytics Beta.
+     *
+     * This will create a new task, uploadXXXXX, where XXXXX is the name of the
+     * product flavor for which the upload task is being created.
+     *
+     * @param groupName The name of the group of users to notify of a new
+     *        distribution. This must be setup in Crashlytics before the task is
+     *        executed.
+     * @param distributionType The type of distribution (e.g. 'release'). Must be
+     *        one of the android.buildTypes, or 'debug' will be used. Defaults to
+     *        'debug'.
+     * @param flavor The ProductFlavor for which this task is being created. This
+     *        is an {@link Object} to prevent us from having to include the
+     *        Android Gradle Plugin in this plugin.
+     */
+    private setupCrashlyticsUploadTask(String groupName, String distributionType,
+                                       Object flavor) {
+      String flavorName = flavor.name;
+      TaskContainer taskContainer = project.getTasks();
+      if (groupName != null) {
+        flavor.ext.betaDistributionGroupAliases = groupName
+      }
+
+      project.afterEvaluate {
+        try {
+          Task createdTask = taskContainer.create("upload"
+            + flavorName.capitalize());
+          String aAn = "aeiou".indexOf((Character.toLowerCase(flavorName.charAt(0)).toString())) >= 0 ? "an" : "a";
+          createdTask.description = "Upload " + aAn + " " + flavorName + " release to Crashlytics Beta and notify group '${groupName}'"
+          String crashlyticsTaskName = "crashlyticsUploadDistribution" + flavorName.capitalize() + "Debug";
+          Task crashlyticsTask = taskContainer.getByName(crashlyticsTaskName)
+          createdTask.dependsOn = [project.assembleAlphaDebug, crashlyticsTask]
+        } catch (UnknownTaskException e) {
+          throw new RuntimeException("Did you forget to apply the fabric plugin?", e);
+        }
+      }
     }
 }
