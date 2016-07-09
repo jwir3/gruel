@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'io.fabric'
 apply plugin: 'gruel'
 
 android {
@@ -14,17 +14,27 @@ android {
     versionName project.TESTAPP_VERSION_NAME
   }
 
+  buildTypes {
+    debug {
+
+    }
+
+    release {
+
+    }
+  }
+
   productFlavors {
     alpha {
       ext.gruelVersionName = ["%version%", "%codeName%", "ALPHA"]
-      gruel.uploadUsing 'crashlytics', delegate
+      gruel.uploadUsing 'crashlytics', 'alpha-testers', 'debug', delegate
       // uploadUsing 'crashlytics'
       // uploadGroup 'Alpha'
     }
 
     beta {
       ext.gruelVersionName = ["%version%", "%codeName%", "BETA"]
-      gruel.uploadUsing 'crashlytics', delegate
+      gruel.uploadUsing 'crashlytics', 'beta-testers', 'release', delegate
       // uploadGroup 'Beta'
     }
 
