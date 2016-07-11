@@ -399,13 +399,15 @@ class GruelExtension {
 
       project.afterEvaluate {
         try {
+          String fullBuildType = flavorName.capitalize() + distributionType.capitalize()
           Task createdTask = taskContainer.create("upload"
             + flavorName.capitalize());
           String aAn = "aeiou".indexOf((Character.toLowerCase(flavorName.charAt(0)).toString())) >= 0 ? "an" : "a";
           createdTask.description = "Upload " + aAn + " " + flavorName + " release to Crashlytics Beta and notify group '${groupName}'"
-          String crashlyticsTaskName = "crashlyticsUploadDistribution" + flavorName.capitalize() + "Debug";
+          String crashlyticsTaskName = "crashlyticsUploadDistribution" + fullBuildType;
           Task crashlyticsTask = taskContainer.getByName(crashlyticsTaskName)
-          createdTask.dependsOn = [project.assembleAlphaDebug, crashlyticsTask]
+          Task assembleTask = taskContainer.getByName("assemble" + fullBuildType)
+          createdTask.dependsOn = [assembleTask, crashlyticsTask]
         } catch (UnknownTaskException e) {
           throw new RuntimeException("Did you forget to apply the fabric plugin?", e);
         }
