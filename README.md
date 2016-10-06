@@ -2,12 +2,14 @@
 A suite of tools for making Gradle builds nice and smooth.
 
 ## Features
-**Currently, `gruel` adds tasks to your gradle build to do the following:**
+**Currently, `gruel` can add tasks to your gradle build to do the following:**
 
 - Notify a HipChat channel with a specific message.
 - Transition Jira issues matching a JQL filter to another status and update fields. This is useful in automating the transition to the appropriate QA status when an alpha build is ready for testing.
 - Bump version numbers in a `gradle.properties` file to conform with semantic versioning.
 - Specify a final archive pattern for Java (JAR) and Android (APK) archives.
+- Upload an Android Package (APK) file to a distribution mechanism for release, with parameters dependent on product flavor.
+  - Currently, Crashlytics is the only supported distribution mechanism. If you're interested in other distribution mechanisms, please <a href="http://www.github.com/jwir3/gruel/issues/new">file an issue</a>.
 
 ## Installation
 Currently, `gruel` is available on the maven central staging repository. Keep in mind, it's in an alpha stage, meaning that it is somewhat unstable yet.
@@ -146,7 +148,7 @@ include gruel and specify a pattern:
 apply plugin: 'gruel'
 
 gruel {
-  archiveName "%appName%", "%version%", "%buildType%", "%commitHash%"
+  archiveName "%appName%", "%version%", "%codeName", "%buildType%", "%commitHash%"
   version android.defaultConfig.versionName
   commitHash gitSha()
 }
@@ -158,8 +160,12 @@ The following variables can be defined:
 | ------------- | ---------------------------------- | ------------- |
 | `%appName%`   | The name of the application.       |  Default module (directory) name |
 | `%version%`   | The human-readable version of the application. | `android.defaultConfig.versionName` |
+| `%codeName`   | An optional code name for the release. | Empty |
 | `%buildType%` | The type of the build (debug or release). | None |
 | `%commitHash%`| The unique identifier of the current HEAD commit. | None |
+| `%timestamp%` | A timestamp for the release, in ISO-8601 format. | Current date/time, in ISO-8601 format |
+
+Any string that is not prefixed and suffixed with "%" will be treated as a literal, and not replaced by gruel.
 
 Gruel provides a method `gitSha(String tagName)` for you to use to retrieve the hash of a named
 `git` commit and a `timestamp()` method to output the current time in ISO 8601 format. You can use
@@ -173,8 +179,51 @@ The output APK will be named to conform to this pattern, in the order of paramet
 Adjusting the name of the final output file is pretty easy in gradle when building Java archives (jar files).
 It's provided by gruel simply for consistency between standard java and Android applications.
 
+### Android Version Name Specification
+In a similar way to setting the output file name using gruel, you can also set the `versionName` property dynamically using gruel:
+
+```
+android {
+  productFlavors {
+    ...
+    production {
+      ext.gruelVersionName = ["%version%", "%codeName%", "ALPHA"]
+    }
+  }
+}
+```
+
+The above script will produce "1.0.0-Xavier-ALPHA" as a version name, if `version` is `1.0.0` and `codeName` is `Xavier`. You can use any variables in the above table to populate your version name.
+
+### Setting up Upload Tasks (Android Only)
+You can configure gruel to setup tasks for each of your `productFlavor`s for an Android project. This will allow you to distribute alpha, beta, production, or any other type of build to users using a task from the command line.
+
+Currently, only Crashlytics Beta/Fabric is supported for distributing builds, so in order to configure these tasks, you must first [enable the fabric.io plugin for gradle](https://docs.fabric.io/android/beta/gradle.html). You may want to verify that `crashlyticsUploadDistributionXXXXX`, where `XXXX` is the name of one of your flavors, succeeds before attempting to configure gruel.
+
+Once this is complete, for each of the flavors that you want to configure, simply call the method `gruel.uploadUsing` during the `productFlavor` configuration:
+```
+android {
+  productFlavors {
+    alpha {
+      gruel.uploadUsing 'crashlytics', 'alpha-testers', 'release', delegate
+    }
+  }
+}
+```
+
+After adding this to the `build.gradle` file, you'll be able to run `./gradlew uploadAlpha`, which will assemble the `alpha` flavor's `release` package and then upload it to Crashlytics. Once uploaded, it will distribute it to all members of the 'alpha-testers' group.
+
+The parameters for this method are as follows:
+
+| Type | Parameter Name | Description | Required? | Default Value |
+| ---- | -------------- | ----------- | --------- | ------------- |
+| String | uploadType | The type of distribution mechanism that should be used to upload this product flavor. Currently, 'crashlytics' is the only supported option, but we anticipate additional options in the future. | Yes | None |
+| String | groupName | The name of the group to distribute releases of this type to. This must be setup using the Crashlytics Beta dashboard. You can omit this parameter if you don't want it to distribute to anyone initially. | No | None |
+| String | buildType | The type of the build (must be one of the build types specified in the `buildTypes` closure to distribute.) Defaults to `debug`. | No | 'debug' |
+| Object | flavor | This is the `productFlavor` instance you are configuring. Due to the semantics of the Gradle DSL, you typically want to specify `delegate` here. If you are configuring this outside of the `productFlavors` closure, then you will need to specify the full object (e.g. `project.android.productFlavors.alpha`). | Yes | None |
+
 ## FAQ
-- __Where did the name come from?__
+- __Where did the project name come from?__
   - The name actually had several iterations. Since it's a suite of tools that can be used immediately from the start of a project, it was called 'cradle', but this didn't seem incredibly descriptive, so it then was changed to 'gradlecradle'. This seemed too long, so the name was changed to 'grools', from "gradle" + "tools". From here, "gruel" seemed better, since it helps smooth out the process of starting a project, and because we didn't want to confuse it with "drools" (a business rules management system).
 
 - __I'm getting an error similar to the following:__
