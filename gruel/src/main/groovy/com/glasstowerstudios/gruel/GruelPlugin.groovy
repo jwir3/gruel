@@ -20,12 +20,20 @@ public class GruelPlugin implements Plugin<Project> {
     aProject.task('bumpVersion', type: BumpVersionTask, description: 'Bumps the version number of the current release.', group: 'Management') << {
     }
 
-    // We only want to add this task if the project is a library (android or JAR)
-    // Perhaps we can detect this if it has a maven publishing task?
-    aProject.task('uninstall', type: UninstallTask, description: "Uninstall any currently installed versions of '${aProject.name}' from the local maven repository") << {
-    }
-
     aProject.afterEvaluate {
+      try {
+        def publishingClosure = aProject.publishing.publications.maven
+        if (publishingClosure) {
+          aProject.task('uninstall', type: UninstallTask,
+                        description: "Uninstall any currently installed versions of '${aProject.name}' from the local maven repository") << {
+          }
+        }
+      } catch (MissingPropertyException e) {
+        // We didn't find a maven publishing closure, so we're not going to add
+        // the uninstall task. We don't actually need to do anything here, so
+        // just catch the exception and move on.
+      }
+
       if (gruelExtension.shouldAdjustOutputSettings()) {
         gruelExtension.adjustOutputSettings(aProject);
         gruelExtension.adjustVersionNameSettings(aProject);
