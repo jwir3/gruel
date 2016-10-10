@@ -1,8 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
-project.version TESTAPP_VERSION_NAME
+project.version "${version}"
 
 buildscript {
   repositories {
@@ -50,6 +51,18 @@ project.task('notifyHipChat', type: com.glasstowerstudios.gruel.tasks.hipchat.Hi
   color = 'yellow'
   message = 'A MESSAGE'
   channelName = 'SomeRoom'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "${group}"
+            artifactId 'GruelTestLibrary'
+            version "${version}"
+            artifact jar
+            from components.java
+        }
+    }
 }
 
 jar {
