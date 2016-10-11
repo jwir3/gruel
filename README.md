@@ -222,6 +222,13 @@ The parameters for this method are as follows:
 | String | buildType | The type of the build (must be one of the build types specified in the `buildTypes` closure to distribute.) Defaults to `debug`. | No | 'debug' |
 | Object | flavor | This is the `productFlavor` instance you are configuring. Due to the semantics of the Gradle DSL, you typically want to specify `delegate` here. If you are configuring this outside of the `productFlavors` closure, then you will need to specify the full object (e.g. `project.android.productFlavors.alpha`). | Yes | None |
 
+### The 'uninstall' Task
+For java and android libraries for which a maven distribution mechanism is specified, gruel will add an 'uninstall' task.
+This task will remove your library project from the _local_ maven repository (not versions pushed to a remote server).
+This allows you to run `./gradlew install` on the library project to test the library locally, and then use
+`./gradlew uninstall` to remove it (if you want to pull the library from local storage so it retrieves the dependency from,
+  e.g. your snapshot repository).
+
 ## FAQ
 - __Where did the project name come from?__
   - The name actually had several iterations. Since it's a suite of tools that can be used immediately from the start of a project, it was called 'cradle', but this didn't seem incredibly descriptive, so it then was changed to 'gradlecradle'. This seemed too long, so the name was changed to 'grools', from "gradle" + "tools". From here, "gruel" seemed better, since it helps smooth out the process of starting a project, and because we didn't want to confuse it with "drools" (a business rules management system).
