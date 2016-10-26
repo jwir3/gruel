@@ -3,22 +3,20 @@ package com.glasstowerstudios.gruel.tasks.jira
 import com.glasstowerstudios.gruel.tasks.GruelTask
 import net.rcarz.jiraclient.BasicCredentials
 import net.rcarz.jiraclient.Issue
-import net.rcarz.jiraclient.Issue.FluentTransition
+import net.rcarz.jiraclient.Issue.FluentUpdate
 import net.rcarz.jiraclient.JiraClient
 import org.gradle.api.tasks.TaskAction
 
 /**
  * A type of {@link GruelTask} that allows the update of JIRA issues from within
- * the gradle build system, while at the same time transitioning the JIRA issue
- * to a new state.
+ * the gradle build system.
  */
-class JiraTransitionTask extends GruelTask {
+class JiraUpdateTask extends GruelTask {
 
   private userName
   private password
   private jiraRootUrl
   private jql
-  private toStatus
   private fieldUpdates = new LinkedHashMap<String, Object>()
 
   void setUserName(String userName) {
@@ -37,10 +35,6 @@ class JiraTransitionTask extends GruelTask {
     this.jql = jql
   }
 
-  void setToStatus(String toStatus) {
-    this.toStatus = toStatus
-  }
-
   void setFieldUpdates(LinkedHashMap<String, Object> fieldUpdates) {
     this.fieldUpdates = fieldUpdates
   }
@@ -52,16 +46,12 @@ class JiraTransitionTask extends GruelTask {
     def result = Issue.search(client.getRestClient(), jql)
 
     for (Issue issue : result.issues) {
-      FluentTransition fluentTransition = issue.transition()
+      FluentUpdate fluentUpdate = issue.update()
       for(Map.Entry<String, Object> entry : fieldUpdates.entrySet()) {
-        fluentTransition.field(entry.getKey(), entry.getValue())
+        fluentUpdate.field(entry.getKey(), entry.getValue())
       }
 
-      if (this.toStatus == null) {
-        fluentTransition.execute();
-      } else {
-        fluentTransition.execute(toStatus);
-      }
+      fluentUpdate.execute();
     }
   }
 }

@@ -65,11 +65,41 @@ Now, to run this task, you can run:
 $ gradle notifyHipchat
 ```
 
+### Jira Issue Manipulations
+You can manipulate Jira issues using the task `JiraUpdateTask`. Any assignable
+field (custom or built-in) can be manipulated using the `fieldUpdates` variable.
+
+The following task sets the `assignee` field to empty (i.e. "Unassigned") for
+all issues that match the given `jql` filter:
+```groovy
+task jiraUpdate(type: com.glasstowerstudios.gruel.tasks.jira.JiraUpdateTask) {
+  userName = JIRA_USERNAME
+  password = JIRA_PASSWORD
+  jiraRootUrl = 'https://COMPANY.atlassian.net'
+  jql = 'project = "PROJECT_NAME" AND status = "CURRENT_STATUS"'
+  fieldUpdates = ['assignee': '']
+}
+```
+
+Now, to run this task, you can run:
+```bash
+$ gradle jiraUpdate
+```
+
 ### Jira Issue Transitions
+You can also transition Jira issues from one state to another using gruel. Since
+the issue state isn't actually a field, but rather metadata than needs to be set
+in a different way, the `JiraTransitionTask` allows you to indicate, in your
+build script, that you want to transition an issue from one state to another.
+
+The transition must be a legal transition, as specified in your Jira workflow.
+
+You may also modify the issue with any of the field update parameters specified
+by Jira Issue Manipulations (above).
 
 Create a task with the following template:
 ```groovy
-task jiraUpdate(type: com.glasstowerstudios.gruel.tasks.jira.JiraTransitionTask) {
+task jiraTransition(type: com.glasstowerstudios.gruel.tasks.jira.JiraTransitionTask) {
   userName = JIRA_USERNAME
   password = JIRA_PASSWORD
   jiraRootUrl = 'https://COMPANY.atlassian.net'
@@ -81,7 +111,7 @@ task jiraUpdate(type: com.glasstowerstudios.gruel.tasks.jira.JiraTransitionTask)
 
 Now, to run this task, you can run:
 ```bash
-$ gradle jiraUpdate
+$ gradle jiraTransition
 ```
 
 ### Bumping Versions
