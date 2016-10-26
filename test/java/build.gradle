@@ -44,17 +44,17 @@ gruel {
 }
 
 github {
-  username='blah'
-  password='123abc456'
-  repo='jwir3/gruel'
+  auth_token 'YOUR_AUTH_TOKEN_HERE'
+  repositoryName 'jwir3/gruel'
 }
 
 hipchat {
   auth_token = "YOUR_AUTH_TOKEN_HERE"
 }
 
-project.task('outputGithubInfo', type: com.glasstowerstudios.gruel.tasks.github.GithubTask) {
-
+project.task('removeTaskHelpWantedLabels', type: com.glasstowerstudios.gruel.tasks.github.RemoveLabelsFromGithubIssueTask) {
+  labels = ['task', 'help wanted']
+  issueNumber = 20
 }
 
 project.task('notifyHipChat', type: com.glasstowerstudios.gruel.tasks.hipchat.HipChatNotificationTask) {

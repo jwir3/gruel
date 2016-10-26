@@ -1,13 +1,15 @@
 package com.glasstowerstudios.gruel.tasks.github
 
 import com.glasstowerstudios.gruel.tasks.GruelTask
-import org.gradle.api.tasks.TaskAction
+import org.kohsuke.github.GitHub
+import org.kohsuke.github.GHRepository
 
 class GithubTask extends GruelTask {
-  @TaskAction
-  def doTask() {
-    println "Github Username: " + project.github.username;
-    println "Github Password: " + project.github.password;
-    println "Github Repo: " + project.github.repo;
+  def getGithubConnection() {
+    return project.github.connect()
+  }
+
+  def getRepository() {
+    return project.github.connectToRepository()
   }
 }

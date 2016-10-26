@@ -1,5 +1,8 @@
 package com.glasstowerstudios.gruel.extensions;
 
+import org.kohsuke.github.GitHub
+import org.kohsuke.github.GHRepository
+
 /**
  * Plugin extension file. This allows specific parameters to be defined in the
  * plugin itself. (Think of it like mini-plugins within the Gruel plugin).
@@ -11,10 +14,28 @@ class GithubExtension {
   String auth_token;
   String username;
   String password;
-  String repo;
+  String repositoryName;
+
+  GitHub connect() {
+    // We can safely assume that, by now, the github extension is valid. It's
+    // checked in the gruel plugin initialization code.
+    GitHub gh;
+    if (auth_token) {
+      gh = GitHub.connectUsingOAuth(auth_token)
+    } else if (username && password) {
+      gh = GitHub.connectUsingPassword(username, password)
+    }
+
+    return gh;
+  }
+
+  GHRepository connectToRepository() {
+    GitHub gh = connect()
+    return gh.getRepository(repositoryName)
+  }
 
   boolean isValid() {
-    return repo != null && !repo.isEmpty() && ((auth_token != null && !auth_token.isEmpty()) || (username != null && !username.isEmpty() && password != null && !password.isEmpty()));
+    return repositoryName != null && !repositoryName.isEmpty() && ((auth_token != null && !auth_token.isEmpty()) || (username != null && !username.isEmpty() && password != null && !password.isEmpty()));
   }
 
   String getUsername() {
@@ -25,8 +46,8 @@ class GithubExtension {
     return password;
   }
 
-  String getRepo() {
-    return repo;
+  String getRepositoryName() {
+    return repositoryName;
   }
 
   String getAuthToken() {
@@ -45,7 +66,7 @@ class GithubExtension {
     password = aPassword;
   }
 
-  void setRepo(String aRepo) {
-    repo = aRepo;
+  void setRepositoryName(String repositoryName) {
+    this.repositoryName = repositoryName;
   }
 }
