@@ -16,6 +16,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'io.reactivex:rxjava-debug:1.0.1'
     compile 'net.rcarz:jira-client:0.5'
+    compile 'org.kohsuke:github-api:1.77'
 }
 
 sourceCompatibility=1.7
