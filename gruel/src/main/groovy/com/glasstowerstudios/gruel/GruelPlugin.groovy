@@ -1,6 +1,7 @@
 package com.glasstowerstudios.gruel
 
 import com.glasstowerstudios.gruel.tasks.BumpVersionTask
+import com.glasstowerstudios.gruel.extensions.JiraExtension
 import com.glasstowerstudios.gruel.extensions.HipChatExtension
 import com.glasstowerstudios.gruel.extensions.GruelExtension
 import com.glasstowerstudios.gruel.tasks.UninstallTask
@@ -16,6 +17,7 @@ public class GruelPlugin implements Plugin<Project> {
     gruelExtension.setProject(aProject);
 
     aProject.extensions.create("hipchat", HipChatExtension);
+    def jiraExtension = aProject.extensions.create("jira", JiraExtension);
 
     aProject.task('bumpVersion', type: BumpVersionTask, description: 'Bumps the version number of the current release.', group: 'Management') << {
     }
