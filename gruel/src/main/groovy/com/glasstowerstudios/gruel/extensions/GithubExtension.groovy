@@ -17,13 +17,11 @@ class GithubExtension {
   String repositoryName;
 
   GitHub connect() {
-    // We can safely assume that, by now, the github extension is valid. It's
-    // checked in the gruel plugin initialization code.
     GitHub gh;
-    if (auth_token) {
-      gh = GitHub.connectUsingOAuth(auth_token)
-    } else if (username && password) {
-      gh = GitHub.connectUsingPassword(username, password)
+    if (getAuthToken()) {
+      gh = GitHub.connectUsingOAuth(getAuthToken())
+    } else if (getUsername() && getPassword()) {
+      gh = GitHub.connectUsingPassword(getUsername(), getPassword())
     }
 
     return gh;
@@ -31,7 +29,7 @@ class GithubExtension {
 
   GHRepository connectToRepository() {
     GitHub gh = connect()
-    return gh.getRepository(repositoryName)
+    return gh.getRepository(getRepositoryName())
   }
 
   boolean isValid() {
@@ -39,31 +37,47 @@ class GithubExtension {
   }
 
   String getUsername() {
+    if (!isValid()) {
+      throw new Exception("You must provide a repository name, and either and auth_token or username/password combination to use the github extension")
+    }
+
     return username;
   }
 
   String getPassword() {
+    if (!isValid()) {
+      throw new Exception("You must provide a repository name, and either and auth_token or username/password combination to use the github extension")
+    }
+
     return password;
   }
 
   String getRepositoryName() {
+    if (!isValid()) {
+      throw new Exception("You must provide a repository name, and either and auth_token or username/password combination to use the github extension")
+    }
+
     return repositoryName;
   }
 
   String getAuthToken() {
+    if (!isValid()) {
+      throw new Exception("You must provide a repository name, and either and auth_token or username/password combination to use the github extension")
+    }
+
     return auth_token;
   }
 
-  void setAuthToken(String aToken) {
-    auth_token = aToken;
+  void setAuthToken(String auth_token) {
+    this.auth_token = auth_token;
   }
 
-  void setUsername(String aUsername) {
-    username = aUsername;
+  void setUsername(String username) {
+    this.username = username;
   }
 
-  void setPassword(String aPassword) {
-    password = aPassword;
+  void setPassword(String password) {
+    this.password = password;
   }
 
   void setRepositoryName(String repositoryName) {

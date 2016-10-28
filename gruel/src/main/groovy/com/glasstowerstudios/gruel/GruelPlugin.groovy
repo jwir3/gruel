@@ -42,12 +42,6 @@ public class GruelPlugin implements Plugin<Project> {
         gruelExtension.adjustOutputSettings(aProject);
         gruelExtension.adjustVersionNameSettings(aProject);
       }
-
-      if (aProject.hasProperty('github')) {
-        if (!githubExtension.isValid()) {
-          throw new Exception("When using the github extension, you must provide a repository, along with either an authentication token, or a username/password combination");
-        }
-      }
     }
   }
 }

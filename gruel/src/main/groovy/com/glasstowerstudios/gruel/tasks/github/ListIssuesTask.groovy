@@ -6,7 +6,7 @@ import org.kohsuke.github.GitHub
 import org.kohsuke.github.GHRepository
 import org.kohsuke.github.GHIssueState
 
-class ListGithubIssuesTask extends GithubTask {
+class ListIssuesTask extends GithubTask {
   @TaskAction
   def doTask() {
     def repo = getRepository()

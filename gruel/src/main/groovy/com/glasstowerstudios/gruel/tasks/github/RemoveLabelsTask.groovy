@@ -7,9 +7,7 @@ import org.gradle.api.tasks.TaskAction
  * A type of {@link GithubTask} that will remove a set of labels from the github
  * issue having a specified issue number.
  */
-class RemoveLabelsFromGithubIssueTask extends GithubTask {
-  public static final String ALL = "all"
-
+class RemoveLabelsTask extends GithubTask {
   private int issueNumber;
   private List<String> labels;
 

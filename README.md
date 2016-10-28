@@ -121,6 +121,43 @@ Now, to run this task, you can run:
 $ gradle jiraTransition
 ```
 
+## Github Integration
+
+In order to use Github integrations, you will need to specify the following closure in your `build.gradle` file:
+```
+  github {
+    repositoryName = <github project name, e.g.
+    username = <YOUR GITHUB USERNAME>
+    password = <YOUR GITHUB PASSWORD>
+    auth_token = <YOUR GITHUB PERSONAL OAUTH TOKEN>
+  }
+```
+You only need to provide _either_ a username/password combination, or an authentication token. A personal access token, generated from http://github.com/settings/profile is fine.
+
+All Github tasks will be run using this configuration.
+
+Currently, there are two tasks you can use with the Github extension (you can add more - pull requests are accepted).
+
+### Removing Labels
+You can use the `RemoveLabelsTask` to remove labels from Github upon a certain action:
+
+```
+task removeDevelopingLabel (type: com.glasstowerstudios.gruel.tasks.github.RemoveLabelsTask) {
+  issueNumber = 20
+  labels = ['developing']
+}
+```
+
+### Setting Assignee
+The `ChangeAssigneeTask` allows you to change the assignee of a particular Github issue:
+
+```
+task removeAssignee (type: com.glasstowerstudios.gruel.tasks.github.ChangeAssigneeTask) {
+  issueNumber = 20
+  assignee = ''
+}
+```
+
 ### Bumping Versions
 The `bumpVersion` task is already added for you. It assumes that you have the following properties in your `gradle.properties` file:
 ```groovy
